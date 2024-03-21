@@ -1,4 +1,4 @@
-﻿namespace NZWalks.API.Controllers
+﻿namespace NZWalks.API.Models.DTO
 {
     public class UpdateWalkRequestDTO
     {

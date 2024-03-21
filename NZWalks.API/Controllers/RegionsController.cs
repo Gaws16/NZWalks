@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NZWalks.API.Data;
+using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -21,23 +19,27 @@ namespace NZWalks.API.Controllers
             regionRepository = _regionRepository;
             mapper = _mapper;
         }
-        // GET: api/Regions
+        // GET: api/Regions/filterOn=Name&filterQuery=Abel&sortBy=Name&isAscending=true&pageNumber=1&pageSize=10
         // Get all regions
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? filterOn, [FromQuery] string? filterQuery,
+                                                    [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
+                                                    [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000)
         {
             //Get data from Database and map it to DTO
             var regions = await regionRepository
-                .GetAllAsync();
+                .GetAllAsync(filterOn,filterQuery,
+                                sortBy,isAscending ?? true,
+                                pageNumber,pageSize);
                            
             //Return the mapped to DTO data
             return Ok(mapper.Map<List<RegionsDTO>>(regions));
         }
 
-        [HttpGet]
-        [Route("{id:Guid}")]
         //Get specific region by id
         // GET: api/Regions/{id}
+        [HttpGet]
+        [Route("{id:Guid}")]
         public async Task<IActionResult> GetRegionById([FromRoute] Guid id)
         {
             //Get specific Region by id
@@ -51,9 +53,10 @@ namespace NZWalks.API.Controllers
             return Ok(mapper.Map<RegionsDTO>(region));
         }
 
-        [HttpPost]
         //Create new region
         // POST: api/Regions
+        [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> CreateRegion([FromBody] CreateRegionRequestDTO region)
         {
             //Map the data to Domain
@@ -72,6 +75,7 @@ namespace NZWalks.API.Controllers
         // PUT: api/Regions/{id}
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegion)
         {
             //Map the data to Domain model
@@ -82,8 +86,6 @@ namespace NZWalks.API.Controllers
             {
                 return NotFound();
             }
-
-     
             //Map the data to return DTO
             //Return the updated object following the RESTful convention
             return Ok(mapper.Map<RegionsDTO>(regionDomainModel));
@@ -95,13 +97,11 @@ namespace NZWalks.API.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-
             var region = await regionRepository.DeleteAsync(id);
             if (region == null)
             {
                 return NotFound();
             }
-            
             //Return the deleted object following the RESTful convention
             return Ok(mapper.Map<RegionsDTO>(region));
         }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -19,12 +20,15 @@ namespace NZWalks.API.Controllers
             walkRepository = _walkRepository;
         }
         [HttpGet]
-        //GET: api/walk/
+        //GET: api/walk/filterOn=Name&filterQuery=Abel&sortBy=Name&isAscending=true&pageNumber=1&pageSize=1000
         //Get all walks
-        public async Task<ActionResult> GetAll()
+        public async Task<ActionResult> GetAll([FromQuery] string? filterOn,
+            [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
+            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000 )
         {
             //get all walks from database
-            var walks = await walkRepository.GetAllAsync();
+            var walks = await walkRepository.GetAllAsync(filterOn,filterQuery,sortBy,
+                isAscending,pageNumber,pageSize);
             //map domain model to response data
             return Ok(mapper.Map<List<WalkDTO>>(walks));
         }
@@ -47,6 +51,7 @@ namespace NZWalks.API.Controllers
 
 
         [HttpPost]
+        [ValidateModel]
         //POST: api/walk/
         //Create a new walk
         public async Task<ActionResult> Create([FromBody]AddWalkRequestDTO addWalkRequestDTO ) 
@@ -64,6 +69,7 @@ namespace NZWalks.API.Controllers
         //Update walk by id
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<ActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkRequestDTO updateWalkRequestDTO)
         {
             //map request data to domain model
