@@ -19,9 +19,9 @@ namespace NZWalks.API.Controllers
             mapper = _mapper;
             walkRepository = _walkRepository;
         }
-        [HttpGet]
         //GET: api/walk/filterOn=Name&filterQuery=Abel&sortBy=Name&isAscending=true&pageNumber=1&pageSize=1000
         //Get all walks
+        [HttpGet]
         public async Task<ActionResult> GetAll([FromQuery] string? filterOn,
             [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000 )
