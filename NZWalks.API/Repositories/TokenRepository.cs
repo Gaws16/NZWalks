@@ -14,7 +14,7 @@ namespace NZWalks.API.Repositories
         {
             this.configuration = configuration;
         }
-        public string GenerateJSONWebToken(IdentityUser user, List<string> roles)
+        public string GenerateJSONWebToken(IdentityUser user, ICollection<string> roles)
         {
             var claims = new List<Claim>();
 

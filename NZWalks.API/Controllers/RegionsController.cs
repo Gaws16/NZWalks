@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Models.Domain;
@@ -22,6 +23,7 @@ namespace NZWalks.API.Controllers
         // GET: api/Regions/filterOn=Name&filterQuery=Abel&sortBy=Name&isAscending=true&pageNumber=1&pageSize=10
         // Get all regions
         [HttpGet]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetAll([FromQuery] string? filterOn, [FromQuery] string? filterQuery,
                                                     [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
                                                     [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000)
@@ -40,6 +42,7 @@ namespace NZWalks.API.Controllers
         // GET: api/Regions/{id}
         [HttpGet]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetRegionById([FromRoute] Guid id)
         {
             //Get specific Region by id
@@ -57,6 +60,7 @@ namespace NZWalks.API.Controllers
         // POST: api/Regions
         [HttpPost]
         [ValidateModel]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> CreateRegion([FromBody] CreateRegionRequestDTO region)
         {
             //Map the data to Domain
@@ -76,6 +80,7 @@ namespace NZWalks.API.Controllers
         [HttpPut]
         [Route("{id:Guid}")]
         [ValidateModel]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegion)
         {
             //Map the data to Domain model
@@ -95,6 +100,7 @@ namespace NZWalks.API.Controllers
         // DELETE: api/Regions/{id}
         [HttpDelete]
         [Route("{id:Guid}")]
+        [Authorize(Roles="Writer")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var region = await regionRepository.DeleteAsync(id);

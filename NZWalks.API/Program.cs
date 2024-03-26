@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NZWalks.API.Data;
 using NZWalks.API.MapperProfiles;
 using NZWalks.API.Repositories;
@@ -14,7 +15,37 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo() { Title = "NZ Walks API", Version = "v1" });
+    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        Description = "Enter 'Bearer' [space] and then your token in the text input below. Example: 'Bearer 12345abcdef.....'"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme
+                },
+                Scheme = "Oauth2",
+                Name = JwtBearerDefaults.AuthenticationScheme,
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
 
 builder.Services.AddDbContext<NZWalksDbContext>(options =>
 {
@@ -29,6 +60,7 @@ builder.Services.AddDbContext<NZWalksAuthDbContext>(options =>
 // Register/inject services
 builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
 builder.Services.AddScoped<IWalkRepository, WalkRepository>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 // Add JWT authentication
